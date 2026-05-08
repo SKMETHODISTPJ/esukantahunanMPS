@@ -396,42 +396,39 @@
         let col = r.includes('hydro') ? 'var(--hydrogen)' : (r.includes('nitro') ? 'var(--nitrogen)' : 'var(--oxygen)');
         
         const semakMedal = (namaAcara, kategori, namaMurid, rumahMurid) => {
+            // Kita guna window.mapKeputusan yang sepatutnya dah diisi di muatSemuaData
             if(!window.mapKeputusan) return "";
             
-            // 1. KUNCI CARIAN: Gabungkan Nama Acara + Kategori (T6L, T5P, dll)
-            // Kita guna UpperCase dan Trim supaya tak sensitif pada 'space'
+            // 1. Standardkan Kunci Carian (Contoh: "TARIK TALI|T6L")
             let cariKey = (namaAcara.trim() + "|" + kategori.trim()).toUpperCase();
-            
-            // Cari keputusan yang sepadan tepat
-            let dataMenang = window.mapKeputusan[cariKey] || null;
+            let dataMenang = null;
 
-            // Jika tak jumpa (mungkin sebab key dlm mapKeputusan guna format lain), kita scan satu-satu
-            if (!dataMenang) {
-                for (let k in window.mapKeputusan) {
-                    if (k.toUpperCase().trim() === cariKey) {
-                        dataMenang = window.mapKeputusan[k];
-                        break;
-                    }
+            // Cari dalam mapKeputusan
+            for (let k in window.mapKeputusan) {
+                if (k.toUpperCase().trim() === cariKey) {
+                    dataMenang = window.mapKeputusan[k];
+                    break;
                 }
             }
             
             if(!dataMenang) return "";
             
-            // 2. Standardkan data untuk perbandingan
-            let pE = (dataMenang.nE || "").toUpperCase().trim();
-            let pP = (dataMenang.nP || "").toUpperCase().trim();
-            let pG = (dataMenang.nG || "").toUpperCase().trim();
-            let nAtlet = (namaMurid || "").toUpperCase().trim();
-            let rAtlet = (rumahMurid || "").toUpperCase().trim();
+            // 2. Standardkan Nama & Rumah (Trim & UpperCase adalah WAJIB)
+            let pE = (dataMenang.nE || "").trim().toUpperCase();
+            let pP = (dataMenang.nP || "").trim().toUpperCase();
+            let pG = (dataMenang.nG || "").trim().toUpperCase();
+            
+            let nAtlet = (namaMurid || "").trim().toUpperCase();
+            let rAtlet = (rumahMurid || "").trim().toUpperCase();
 
-            const senaraiRumah = ["HYDROGEN", "NITROGEN", "OXYGEN"];
+            // Senarai nama rumah untuk pengecaman acara kumpulan
+            const rumahSukan = ["HYDROGEN", "NITROGEN", "OXYGEN"];
 
-            // 3. LOGIK PADANAN:
-            // Medal hanya keluar jika:
-            // (Nama Murid Menang) ATAU (Pemenang adalah Rumah dia DAN murid ni dari rumah tersebut)
-            if(pE === nAtlet || (senaraiRumah.includes(pE) && pE === rAtlet)) return " 🥇";
-            if(pP === nAtlet || (senaraiRumah.includes(pP) && pP === rAtlet)) return " 🥈";
-            if(pG === nAtlet || (senaraiRumah.includes(pG) && pG === rAtlet)) return " 🥉";
+            // 3. Logik Padanan Medal
+            // Syarat: Nama individu sama OR (Pemenang adalah Nama Rumah DAN murid dari rumah tersebut)
+            if (pE === nAtlet || (rumahSukan.includes(pE) && pE === rAtlet)) return " 🥇";
+            if (pP === nAtlet || (rumahSukan.includes(pP) && pP === rAtlet)) return " 🥈";
+            if (pG === nAtlet || (rumahSukan.includes(pG) && pG === rAtlet)) return " 🥉";
             
             return "";
         };
@@ -444,15 +441,15 @@
                 <div class="p-3 d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#atlet-${i}" style="cursor:pointer">
                     <div>
                         <div class="fw-bold small text-white">${p.nama}</div>
-                        <small class="text-white-50" style="font-size:0.6rem">${p.kategori} | ${p.rumah.toUpperCase()}</small>
+                        <small class="text-white-50" style="font-size:0.6rem; text-transform:uppercase;">${p.kategori} | ${p.rumah}</small>
                     </div>
                     <i class="fas fa-chevron-down text-white-50 small"></i>
                 </div>
                 <div id="atlet-${i}" class="collapse p-3 bg-black border-top border-secondary">
                     <div class="mb-2 text-info small fw-bold" style="font-size:0.65rem; letter-spacing:1px;">ACARA INDIVIDU</div>
-                    <div class="text-white small mb-3" style="line-height:1.6">${indHTML}</div>
+                    <div class="text-white small mb-3" style="line-height:1.5">${indHTML}</div>
                     <div class="mb-2 text-warning small fw-bold" style="font-size:0.65rem; letter-spacing:1px;">ACARA KUMPULAN</div>
-                    <div class="text-white small" style="line-height:1.6">${kumpHTML}</div>
+                    <div class="text-white small" style="line-height:1.5">${kumpHTML}</div>
                 </div>
             </div>`;
     });
