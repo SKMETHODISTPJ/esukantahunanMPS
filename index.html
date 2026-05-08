@@ -574,15 +574,18 @@
                 </div>
                 <div class="flex-grow-1">
                     <div class="fw-bold small text-white">${atlet.nama}</div>
-                    <div class="d-flex gap-3 mt-1">
-                        <span class="small" style="font-size: 0.7rem;">🥇 ${atlet.e || 0}</span>
-                        <span class="small" style="font-size: 0.7rem;">🥈 ${atlet.p || 0}</span>
-                        <span class="small" style="font-size: 0.7rem;">🥉 ${atlet.g || 0}</span>
-                    </div>
+                    <div class="text-white-50 small" style="font-size: 0.65rem; text-transform: uppercase;">${atlet.rumah}</div>
                 </div>
-                <div class="text-end">
-                    <div class="fw-bold text-white" style="font-size: 0.9rem;">${atlet.mata}</div>
-                    <div class="text-white-50" style="font-size: 0.6rem; letter-spacing: 1px;">MATA</div>
+                <div class="text-end d-flex gap-2">
+                    <div class="px-2 py-1" style="background: rgba(255,255,255,0.1); border-radius: 6px;">
+                        <span style="font-size: 0.8rem;">🥇 ${atlet.e || 0}</span>
+                    </div>
+                    <div class="px-2 py-1" style="background: rgba(255,255,255,0.1); border-radius: 6px;">
+                        <span style="font-size: 0.8rem;">🥈 ${atlet.p || 0}</span>
+                    </div>
+                    <div class="px-2 py-1" style="background: rgba(255,255,255,0.1); border-radius: 6px;">
+                        <span style="font-size: 0.8rem;">🥉 ${atlet.g || 0}</span>
+                    </div>
                 </div>
             </div>
         `;
