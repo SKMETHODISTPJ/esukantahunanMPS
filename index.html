@@ -192,6 +192,15 @@
             <small class="text-white-50">Senarai Atlet Rumah:</small>
             <h4 id="label-rumah" style="font-weight: bold;"></h4>
         </div>
+        <div class="px-3 mb-3">
+    <div class="input-group">
+        <span class="input-group-text bg-dark border-secondary text-white-50">
+            <i class="fas fa-search"></i>
+        </span>
+        <input type="text" id="inputCarianAtlet" class="form-control bg-dark border-secondary text-white" 
+               placeholder="Cari nama atlet..." onkeyup="tapisNamaAtlet()">
+    </div>
+</div>
         <div id="senaraiPeserta"><div class="text-center text-white-50 mt-4 small">Sila pilih rumah sukan di atas.</div></div>
     </div>
 
@@ -477,6 +486,22 @@
         let input = document.getElementById('inputCarianAcara').value.toLowerCase();
         document.querySelectorAll('.acara-card').forEach(card => card.style.display = card.getAttribute('data-acara-name').includes(input) ? 'block' : 'none');
     }
+    function tapisNamaAtlet() {
+    let input = document.getElementById('inputCarianAtlet').value.toLowerCase();
+    
+    // Kita ambil semua kad peserta yang sedang dipaparkan
+    document.querySelectorAll('.peserta-card').forEach(card => {
+        // Ambil teks nama dari dalam kad tersebut
+        let namaAtlet = card.querySelector('.fw-bold.small.text-white').innerText.toLowerCase();
+        
+        // Kalau nama ada dalam input, tunjuk. Kalau tak, sembunyi.
+        if (namaAtlet.includes(input)) {
+            card.style.display = 'block';
+        } else {
+            card.style.display = 'none';
+        }
+    });
+}
 
     function bukaHakim(ac, kt) {
         let pin = prompt("PIN Hakim:"); if (pin !== "2026") return;
