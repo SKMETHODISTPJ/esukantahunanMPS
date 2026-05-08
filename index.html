@@ -568,24 +568,24 @@
                   ((atlet.rumah || "").toLowerCase().includes('nitro') ? 'var(--nitrogen)' : 'var(--oxygen)');
         
         list.innerHTML += `
-            <div class="d-flex align-items-center mb-3 p-2" style="background: rgba(255,255,255,0.05); border-radius: 12px; border-left: 4px solid ${col}">
-                <div class="me-3 text-center" style="width: 30px;">
-                    <span class="fw-bold" style="color: ${col}">#${i + 1}</span>
+            <div class="d-flex align-items-center mb-2 p-2" style="background: rgba(255,255,255,0.05); border-radius: 10px; border-left: 3px solid ${col}">
+                <div class="me-2 text-center" style="width: 25px;">
+                    <span class="fw-bold" style="color: ${col}; font-size: 0.8rem;">${i + 1}</span>
                 </div>
-                <div class="flex-grow-1">
-                    <div class="fw-bold small text-white">${atlet.nama}</div>
-                    <div class="text-white-50 small" style="font-size: 0.65rem; text-transform: uppercase;">${atlet.rumah}</div>
+                
+                <div class="flex-grow-1" style="min-width: 0;">
+                    <div class="fw-bold text-white truncate" style="font-size: 0.75rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        ${atlet.nama}
+                    </div>
+                    <div class="text-white-50" style="font-size: 0.6rem; text-transform: uppercase; letter-spacing: 0.5px;">
+                        ${atlet.rumah}
+                    </div>
                 </div>
-                <div class="text-end d-flex gap-2">
-                    <div class="px-2 py-1" style="background: rgba(255,255,255,0.1); border-radius: 6px;">
-                        <span style="font-size: 0.8rem;">🥇 ${atlet.e || 0}</span>
-                    </div>
-                    <div class="px-2 py-1" style="background: rgba(255,255,255,0.1); border-radius: 6px;">
-                        <span style="font-size: 0.8rem;">🥈 ${atlet.p || 0}</span>
-                    </div>
-                    <div class="px-2 py-1" style="background: rgba(255,255,255,0.1); border-radius: 6px;">
-                        <span style="font-size: 0.8rem;">🥉 ${atlet.g || 0}</span>
-                    </div>
+
+                <div class="d-flex align-items-center gap-2 ms-2">
+                    <div style="font-size: 0.75rem; color: #fff;">🥇<span class="ms-1">${atlet.e || 0}</span></div>
+                    <div style="font-size: 0.75rem; color: #fff;">🥈<span class="ms-1">${atlet.p || 0}</span></div>
+                    <div style="font-size: 0.75rem; color: #fff;">🥉<span class="ms-1">${atlet.g || 0}</span></div>
                 </div>
             </div>
         `;
