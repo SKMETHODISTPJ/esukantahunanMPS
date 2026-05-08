@@ -384,54 +384,43 @@
     }
 
     function paparkanPeserta(arr) {
-        const c = document.getElementById('senaraiPeserta'); c.innerHTML = '';
-        if (arr.length === 0) { c.innerHTML = '<div class="text-center text-white-50 py-4 small">Tiada peserta.</div>'; return; }
+    const c = document.getElementById('senaraiPeserta'); 
+    c.innerHTML = '';
+    if (arr.length === 0) { c.innerHTML = '<div class="text-center text-white-50 py-4 small">Tiada peserta.</div>'; return; }
+    
+    arr.forEach((p, i) => {
+        let r = p.rumah.toLowerCase();
+        let col = r.includes('hydro') ? 'var(--hydrogen)' : (r.includes('nitro') ? 'var(--nitrogen)' : 'var(--oxygen)');
         
-        arr.forEach((p, i) => {
-            let r = p.rumah.toLowerCase();
-            let col = r.includes('hydro') ? 'var(--hydrogen)' : (r.includes('nitro') ? 'var(--nitrogen)' : 'var(--oxygen)');
+        // Cek medal Individu DAN Kumpulan
+        const semakMedal = (namaAcara, kategori, namaMurid, rumahMurid) => {
+            let key = namaAcara + "|" + kategori;
+            let kep = window.mapKeputusan ? window.mapKeputusan[key] : null;
+            if(!kep) return "";
             
-            // Logik untuk paparkan medal bagi acara Individu
-            let indHTML = p.ind.map(ac => {
-                let key = ac + "|" + p.kategori;
-                let keputusan = window.mapKeputusan[key];
-                let medal = "";
-                
-                if(keputusan) {
-                    if(keputusan.nE === p.nama) medal = " 🥇";
-                    else if(keputusan.nP === p.nama) medal = " 🥈";
-                    else if(keputusan.nG === p.nama) medal = " 🥉";
-                }
-                return `<div style="font-size:0.8rem">${ac}${medal}</div>`;
-            }).join('') || '-';
+            // Menang sebagai individu OR rumah dia menang (untuk acara kumpulan)
+            if(kep.nE === namaMurid || (["Hydrogen","Nitrogen","Oxygen"].includes(kep.nE) && kep.rE === rumahMurid)) return " 🥇";
+            if(kep.nP === namaMurid || (["Hydrogen","Nitrogen","Oxygen"].includes(kep.nP) && kep.rP === rumahMurid)) return " 🥈";
+            if(kep.nG === namaMurid || (["Hydrogen","Nitrogen","Oxygen"].includes(kep.nG) && kep.rG === rumahMurid)) return " 🥉";
+            return "";
+        };
 
-            // Logik untuk paparkan medal bagi acara Kumpulan (Berdasarkan Rumah)
-            let kumpHTML = p.kump.map(ac => {
-                let key = ac + "|" + p.kategori;
-                let keputusan = window.mapKeputusan[key];
-                let medal = "";
-                
-                if(keputusan) {
-                    // Untuk kumpulan, kita check rumah sebab biasanya nE simpan nama rumah
-                    if(keputusan.rE === p.rumah) medal = " 🥇";
-                    else if(keputusan.rP === p.rumah) medal = " 🥈";
-                    else if(keputusan.rG === p.rumah) medal = " 🥉";
-                }
-                return `<div style="font-size:0.8rem">${ac}${medal}</div>`;
-            }).join('') || '-';
+        let indHTML = p.ind.map(ac => `<div>${ac}${semakMedal(ac, p.kategori, p.nama, p.rumah)}</div>`).join('') || '-';
+        let kumpHTML = p.kump.map(ac => `<div>${ac}${semakMedal(ac, p.kategori, p.nama, p.rumah)}</div>`).join('') || '-';
 
-            c.innerHTML += `<div class="peserta-card mb-2" style="border-left:4px solid ${col}; background: rgba(255,255,255,0.05); border-radius: 8px;">
-                <div class="header-utama d-flex justify-content-between p-3" data-bs-toggle="collapse" data-bs-target="#atlet-${i}" style="cursor:pointer">
-                    <div><div class="fw-bold small text-white">${p.nama}</div><small class="text-white-50" style="font-size:0.65rem">${p.kategori}</small></div>
+        c.innerHTML += `
+            <div class="peserta-card mb-2" style="border-left:4px solid ${col}; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <div class="p-3 d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#atlet-${i}" style="cursor:pointer">
+                    <div><div class="fw-bold small text-white">${p.nama}</div><small class="text-white-50">${p.kategori}</small></div>
                     <i class="fas fa-chevron-down text-white-50 small"></i>
                 </div>
                 <div id="atlet-${i}" class="collapse p-3 bg-black border-top border-secondary">
-                    <div class="mb-2"><small class="text-info d-block fw-bold" style="font-size:0.6rem;">INDIVIDU</small><div class="text-white">${indHTML}</div></div>
-                    <div><small class="text-warning d-block fw-bold" style="font-size:0.6rem;">KUMPULAN</small><div class="text-white">${kumpHTML}</div></div>
+                    <div class="mb-2 text-info small fw-bold">INDIVIDU</div><div class="text-white small">${indHTML}</div>
+                    <div class="mt-2 text-warning small fw-bold">KUMPULAN</div><div class="text-white small">${kumpHTML}</div>
                 </div>
             </div>`;
-        });
-    }
+    });
+}
 
     function paparkanAcara(obj) {
         const c = document.getElementById('senaraiAcaraHierarki'); 
@@ -520,7 +509,10 @@
     }
 
     function hitungTopAthlete(keputusan) {
-    if(!keputusan) return;
+    const listL = document.getElementById('list-olahragawan');
+    const listP = document.getElementById('list-olahragawati');
+    if(!keputusan || !window.dataPeserta) return;
+
     let lMap = {}, pMap = {};
     
     keputusan.forEach(k => {
@@ -533,43 +525,39 @@
         winners.forEach(w => {
             if(!w.n) return;
 
-            // Tentukan kategori (L/P)
-            let targetMap = (k.kategori || "").toUpperCase().includes('L') ? lMap : pMap;
-
-            // LOGIK BARU: Jika pemenang adalah RUMAH (Acara Kumpulan)
-            if(["Hydrogen", "Nitrogen", "Oxygen"].includes(w.n)) {
-                // Cari semua murid yang daftar acara & kategori ini dari rumah tersebut
-                let ahliKumpulan = window.dataPeserta.filter(p => 
+            // Logik: Adakah pemenang ini sebuah RUMAH?
+            const adakahRumah = ["Hydrogen", "Nitrogen", "Oxygen"].includes(w.n);
+            
+            if(adakahRumah) {
+                // Cari ahli kumpulan yang daftar acara + kategori + rumah yang sama
+                let ahli = window.dataPeserta.filter(p => 
                     p.acara === k.acara && 
                     p.kategori === k.kategori && 
                     p.rumah === w.n
                 );
 
-                // Beri medal kepada setiap ahli
-                ahliKumpulan.forEach(murid => {
-                    if(!targetMap[murid.nama]) {
-                        targetMap[murid.nama] = { nama: murid.nama, rumah: murid.rumah, e: 0, p: 0, g: 0, mata: 0 };
-                    }
-                    if(w.t === 'E') targetMap[murid.nama].e++;
-                    if(w.t === 'P') targetMap[murid.nama].p++;
-                    if(w.t === 'G') targetMap[murid.nama].g++;
-                    targetMap[murid.nama].mata += w.m;
+                ahli.forEach(m => {
+                    let targetMap = (m.kategori || "").toUpperCase().includes('L') ? lMap : pMap;
+                    if(!targetMap[m.nama]) targetMap[m.nama] = { nama: m.nama, rumah: m.rumah, e:0, p:0, g:0, mata:0 };
+                    
+                    if(w.t === 'E') targetMap[m.nama].e++;
+                    else if(w.t === 'P') targetMap[m.nama].p++;
+                    else if(w.t === 'G') targetMap[m.nama].g++;
+                    targetMap[m.nama].mata += w.m;
                 });
-            } 
-            // Jika pemenang adalah INDIVIDU (Macam biasa)
-            else {
-                if(!targetMap[w.n]) {
-                    targetMap[w.n] = { nama: w.n, rumah: w.r, e: 0, p: 0, g: 0, mata: 0 };
-                }
+            } else {
+                // Individu biasa
+                let targetMap = (k.kategori || "").toUpperCase().includes('L') ? lMap : pMap;
+                if(!targetMap[w.n]) targetMap[w.n] = { nama: w.n, rumah: w.r, e:0, p:0, g:0, mata:0 };
+                
                 if(w.t === 'E') targetMap[w.n].e++;
-                if(w.t === 'P') targetMap[w.n].p++;
-                if(w.t === 'G') targetMap[w.n].g++;
+                else if(w.t === 'P') targetMap[w.n].p++;
+                else if(w.t === 'G') targetMap[w.n].g++;
                 targetMap[w.n].mata += w.m;
             }
         });
     });
-    
-    // Susun ikut mata, jika seri ikut bilangan emas
+
     const sortAt = (m) => Object.values(m).sort((a,b) => b.mata - a.mata || b.e - a.e).slice(0,5);
     renderTop(sortAt(lMap), 'list-olahragawan');
     renderTop(sortAt(pMap), 'list-olahragawati');
