@@ -385,20 +385,25 @@
 
     function paparkanPeserta(arr) {
     const c = document.getElementById('senaraiPeserta'); 
+    if(!c) return;
     c.innerHTML = '';
-    if (arr.length === 0) { c.innerHTML = '<div class="text-center text-white-50 py-4 small">Tiada peserta.</div>'; return; }
     
     arr.forEach((p, i) => {
-        let r = p.rumah.toLowerCase();
+        let r = (p.rumah || "").toLowerCase();
         let col = r.includes('hydro') ? 'var(--hydrogen)' : (r.includes('nitro') ? 'var(--nitrogen)' : 'var(--oxygen)');
         
-        // Cek medal Individu DAN Kumpulan
         const semakMedal = (namaAcara, kategori, namaMurid, rumahMurid) => {
-            let key = namaAcara + "|" + kategori;
-            let kep = window.mapKeputusan ? window.mapKeputusan[key] : null;
+            if(!window.dataKeputusan) return "";
+            
+            // Cari keputusan bagi acara & kategori ini
+            let kep = window.dataKeputusan.find(k => 
+                String(k.acara).trim().toUpperCase() === String(namaAcara).trim().toUpperCase() && 
+                String(k.kategori).trim().toUpperCase() === String(kategori).trim().toUpperCase()
+            );
+            
             if(!kep) return "";
             
-            // Menang sebagai individu OR rumah dia menang (untuk acara kumpulan)
+            // Logik: Individu menang ATAU Rumah menang (Kumpulan)
             if(kep.nE === namaMurid || (["Hydrogen","Nitrogen","Oxygen"].includes(kep.nE) && kep.rE === rumahMurid)) return " 🥇";
             if(kep.nP === namaMurid || (["Hydrogen","Nitrogen","Oxygen"].includes(kep.nP) && kep.rP === rumahMurid)) return " 🥈";
             if(kep.nG === namaMurid || (["Hydrogen","Nitrogen","Oxygen"].includes(kep.nG) && kep.rG === rumahMurid)) return " 🥉";
@@ -509,8 +514,11 @@
     }
 
     function hitungTopAthlete(keputusan) {
+    // Pastikan ID ini betul dalam HTML cikgu
     const listL = document.getElementById('list-olahragawan');
     const listP = document.getElementById('list-olahragawati');
+    
+    // Jika data belum sedia, jangan teruskan supaya tak ralat
     if(!keputusan || !window.dataPeserta) return;
 
     let lMap = {}, pMap = {};
@@ -525,15 +533,14 @@
         winners.forEach(w => {
             if(!w.n) return;
 
-            // Logik: Adakah pemenang ini sebuah RUMAH?
             const adakahRumah = ["Hydrogen", "Nitrogen", "Oxygen"].includes(w.n);
             
             if(adakahRumah) {
-                // Cari ahli kumpulan yang daftar acara + kategori + rumah yang sama
+                // Cari murid yang daftar acara + kategori + rumah yang sama
                 let ahli = window.dataPeserta.filter(p => 
-                    p.acara === k.acara && 
-                    p.kategori === k.kategori && 
-                    p.rumah === w.n
+                    String(p.acara).trim() === String(k.acara).trim() && 
+                    String(p.kategori).trim() === String(k.kategori).trim() && 
+                    String(p.rumah).trim() === String(w.n).trim()
                 );
 
                 ahli.forEach(m => {
@@ -546,7 +553,7 @@
                     targetMap[m.nama].mata += w.m;
                 });
             } else {
-                // Individu biasa
+                // Individu
                 let targetMap = (k.kategori || "").toUpperCase().includes('L') ? lMap : pMap;
                 if(!targetMap[w.n]) targetMap[w.n] = { nama: w.n, rumah: w.r, e:0, p:0, g:0, mata:0 };
                 
