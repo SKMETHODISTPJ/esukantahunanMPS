@@ -520,23 +520,40 @@
     }
 
     function hitungTopAthlete(keputusan) {
-        if(!keputusan) return;
-        let lMap = {}, pMap = {};
-        keputusan.forEach(k => {
-            let winners = [{n: k.nE, r: k.rE, m: 10}, {n: k.nP, r: k.rP, m: 6}, {n: k.nG, r: k.rG, m: 3}];
-            let targetMap = (k.kategori || "").toUpperCase().includes('L') ? lMap : pMap;
-            winners.forEach(w => {
-                if(w.n && !["Hydrogen", "Nitrogen", "Oxygen"].includes(w.n)) {
-                    if(!targetMap[w.n]) targetMap[w.n] = { nama: w.n, rumah: w.r, e:0, p:0, g:0, mata:0 };
-                    if(w.m===10) targetMap[w.n].e++; if(w.m===7) targetMap[w.n].p++; if(w.m===4) targetMap[w.n].g++;
-                    targetMap[w.n].mata += w.m;
+    if(!keputusan) return;
+    let lMap = {}, pMap = {};
+    
+    keputusan.forEach(k => {
+        // Pastikan w.type betul untuk rujukan
+        let winners = [
+            {n: k.nE, r: k.rE, m: 10, t: 'E'}, 
+            {n: k.nP, r: k.rP, m: 6,  t: 'P'}, 
+            {n: k.nG, r: k.rG, m: 3,  t: 'G'}
+        ];
+        
+        let targetMap = (k.kategori || "").toUpperCase().includes('L') ? lMap : pMap;
+        
+        winners.forEach(w => {
+            if(w.n && !["Hydrogen", "Nitrogen", "Oxygen"].includes(w.n)) {
+                if(!targetMap[w.n]) {
+                    // DI SINI: Bekas untuk simpan bilangan medal
+                    targetMap[w.n] = { nama: w.n, rumah: w.r, e: 0, p: 0, g: 0, mata: 0 };
                 }
-            });
+                
+                // DI SINI PUNCA MASALAH: Pastikan ketiga-tiga ini ada
+                if(w.t === 'E') targetMap[w.n].e++; 
+                if(w.t === 'P') targetMap[w.n].p++; // Simpan bilangan perak
+                if(w.t === 'G') targetMap[w.n].g++; // Simpan bilangan gangsa
+                
+                targetMap[w.n].mata += w.m;
+            }
         });
-        const sortAt = (m) => Object.values(m).sort((a,b) => b.mata - a.mata).slice(0,5);
-        renderTop(sortAt(lMap), 'list-olahragawan');
-        renderTop(sortAt(pMap), 'list-olahragawati');
-    }
+    });
+    
+    const sortAt = (m) => Object.values(m).sort((a,b) => b.mata - a.mata || b.e - a.e).slice(0,5);
+    renderTop(sortAt(lMap), 'list-olahragawan');
+    renderTop(sortAt(pMap), 'list-olahragawati');
+}
 
     function renderTop(arr, id) {
     const list = document.getElementById(id);
