@@ -396,16 +396,38 @@
         let col = r.includes('hydro') ? 'var(--hydrogen)' : (r.includes('nitro') ? 'var(--nitrogen)' : 'var(--oxygen)');
         
         const semakMedal = (namaAcara, kategori, namaMurid, rumahMurid) => {
-            // Gunakan mapKeputusan yang sudah kita bina di muatSemuaData
-            let key = namaAcara + "|" + kategori;
-            let kep = window.mapKeputusan ? window.mapKeputusan[key] : null;
+            if(!window.mapKeputusan) return "";
             
-            if(!kep) return "";
+            // KITA GUNA LOGIK CARIAN YANG LEBIH PADU (Case-Insensitive & Trim)
+            const cariKey = (namaAcara.trim() + "|" + kategori.trim()).toUpperCase();
             
-            // Cek jika nama murid menang ATAU jika rumah menang dalam acara kumpulan
-            if(kep.nE === namaMurid || (["Hydrogen","Nitrogen","Oxygen"].includes(kep.nE) && kep.rE === rumahMurid)) return " 🥇";
-            if(kep.nP === namaMurid || (["Hydrogen","Nitrogen","Oxygen"].includes(kep.nP) && kep.rP === rumahMurid)) return " 🥈";
-            if(kep.nG === namaMurid || (["Hydrogen","Nitrogen","Oxygen"].includes(kep.nG) && kep.rG === rumahMurid)) return " 🥉";
+            // Cari dalam mapKeputusan dengan menukar semua key kepada UpperCase
+            let dataMenang = null;
+            for (let key in window.mapKeputusan) {
+                if (key.toUpperCase().trim() === cariKey) {
+                    dataMenang = window.mapKeputusan[key];
+                    break;
+                }
+            }
+            
+            if(!dataMenang) return "";
+            
+            // Standardkan nama pemenang & rumah untuk perbandingan
+            let pemenangE = (dataMenang.nE || "").trim().toUpperCase();
+            let pemenangP = (dataMenang.nP || "").trim().toUpperCase();
+            let pemenangG = (dataMenang.nG || "").trim().toUpperCase();
+            let nMurid = (namaMurid || "").trim().toUpperCase();
+            let rMurid = (rumahMurid || "").trim().toUpperCase();
+
+            const senaraiRumah = ["HYDROGEN", "NITROGEN", "OXYGEN"];
+
+            // 1. Check EMAS (Individu ATAU Kumpulan)
+            if(pemenangE === nMurid || (senaraiRumah.includes(pemenangE) && pemenangE === rMurid)) return " 🥇";
+            // 2. Check PERAK
+            if(pemenangP === nMurid || (senaraiRumah.includes(pemenangP) && pemenangP === rMurid)) return " 🥈";
+            // 3. Check GANGSA
+            if(pemenangG === nMurid || (senaraiRumah.includes(pemenangG) && pemenangG === rMurid)) return " 🥉";
+            
             return "";
         };
 
@@ -419,8 +441,10 @@
                     <i class="fas fa-chevron-down text-white-50 small"></i>
                 </div>
                 <div id="atlet-${i}" class="collapse p-3 bg-black border-top border-secondary">
-                    <div class="mb-2 text-info small fw-bold">INDIVIDU</div><div class="text-white small">${indHTML}</div>
-                    <div class="mt-2 text-warning small fw-bold">KUMPULAN</div><div class="text-white small">${kumpHTML}</div>
+                    <div class="mb-2 text-info small fw-bold" style="letter-spacing:1px">ACARA INDIVIDU</div>
+                    <div class="text-white small mb-3">${indHTML}</div>
+                    <div class="mb-2 text-warning small fw-bold" style="letter-spacing:1px">ACARA KUMPULAN</div>
+                    <div class="text-white small">${kumpHTML}</div>
                 </div>
             </div>`;
     });
