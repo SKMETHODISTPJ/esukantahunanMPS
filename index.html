@@ -398,27 +398,18 @@
         const semakMedal = (namaAcara, kategori, namaMurid, rumahMurid) => {
             if(!window.mapKeputusan) return "";
             
-            // 1. Kita buat carian yang lebih fleksibel
-            // Kadang-kadang kategori dlm pendaftaran "Lelaki", dlm keputusan "Lelaki (Khas)"
-            // Jadi kita cari keputusan yang MENGANDUNGI nama acara & kategori tersebut
-            let dataMenang = null;
-            let cariKey = (namaAcara + "|" + kategori).toUpperCase().trim();
+            // 1. KUNCI CARIAN: Gabungkan Nama Acara + Kategori (T6L, T5P, dll)
+            // Kita guna UpperCase dan Trim supaya tak sensitif pada 'space'
+            let cariKey = (namaAcara.trim() + "|" + kategori.trim()).toUpperCase();
+            
+            // Cari keputusan yang sepadan tepat
+            let dataMenang = window.mapKeputusan[cariKey] || null;
 
-            // Cuba cari direct match dulu
-            for (let key in window.mapKeputusan) {
-                if (key.toUpperCase().trim() === cariKey) {
-                    dataMenang = window.mapKeputusan[key];
-                    break;
-                }
-            }
-
-            // Jika tak jumpa direct match, cuba cari yang "lebih kurang" sama
+            // Jika tak jumpa (mungkin sebab key dlm mapKeputusan guna format lain), kita scan satu-satu
             if (!dataMenang) {
-                for (let key in window.mapKeputusan) {
-                    let part = key.toUpperCase().split('|');
-                    if (namaAcara.toUpperCase().trim() === part[0].trim() && 
-                        kategori.toUpperCase().trim().includes(part[1].trim())) {
-                        dataMenang = window.mapKeputusan[key];
+                for (let k in window.mapKeputusan) {
+                    if (k.toUpperCase().trim() === cariKey) {
+                        dataMenang = window.mapKeputusan[k];
                         break;
                     }
                 }
@@ -435,8 +426,9 @@
 
             const senaraiRumah = ["HYDROGEN", "NITROGEN", "OXYGEN"];
 
-            // 3. Logik "Lekatkan" Medal
-            // Jika nama murid sama OR (pemenang adalah Rumah dia DAN murid ni dari rumah tu)
+            // 3. LOGIK PADANAN:
+            // Medal hanya keluar jika:
+            // (Nama Murid Menang) ATAU (Pemenang adalah Rumah dia DAN murid ni dari rumah tersebut)
             if(pE === nAtlet || (senaraiRumah.includes(pE) && pE === rAtlet)) return " 🥇";
             if(pP === nAtlet || (senaraiRumah.includes(pP) && pP === rAtlet)) return " 🥈";
             if(pG === nAtlet || (senaraiRumah.includes(pG) && pG === rAtlet)) return " 🥉";
@@ -457,10 +449,10 @@
                     <i class="fas fa-chevron-down text-white-50 small"></i>
                 </div>
                 <div id="atlet-${i}" class="collapse p-3 bg-black border-top border-secondary">
-                    <div class="mb-2 text-info small fw-bold" style="font-size:0.65rem">INDIVIDU</div>
-                    <div class="text-white small mb-3">${indHTML}</div>
-                    <div class="mb-2 text-warning small fw-bold" style="font-size:0.65rem">KUMPULAN</div>
-                    <div class="text-white small">${kumpHTML}</div>
+                    <div class="mb-2 text-info small fw-bold" style="font-size:0.65rem; letter-spacing:1px;">ACARA INDIVIDU</div>
+                    <div class="text-white small mb-3" style="line-height:1.6">${indHTML}</div>
+                    <div class="mb-2 text-warning small fw-bold" style="font-size:0.65rem; letter-spacing:1px;">ACARA KUMPULAN</div>
+                    <div class="text-white small" style="line-height:1.6">${kumpHTML}</div>
                 </div>
             </div>`;
     });
