@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Urus Setia Hari Sukan 2026</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+        
+        :root { --hydrogen: #2ecc71; --nitrogen: #3498db; --oxygen: #f1c40f; --bg-dark: #121212; }
+        body { background: linear-gradient(135deg, #0f2027, #203a43, #2c5364); background-attachment: fixed; color: white; font-family: 'Plus Jakarta Sans', sans-serif; padding-bottom: 80px; overflow-x: hidden; }
+        
+        /* LOADING SCREEN CSS */
+        #loading-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background-color: #f8fafc; /* Warna background asal yang cikgu nak */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.6s ease;
+        }
+        .loading-bar-bg { width: 250px; height: 10px; background: #e2e8f0; border-radius: 10px; overflow: hidden; margin-top: 20px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.05); }
+        #loading-progress { height: 100%; width: 0%; background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%); transition: width 0.4s ease; }
+        .animate-ping-custom { animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite; }
+        @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
+
+        /* APP STYLES */
+        .app-header { text-align: center; padding: 25px 0 15px 0; background: rgba(0, 0, 0, 0.3); backdrop-filter: blur(10px); margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        .app-header h2 { font-weight: 800; letter-spacing: 2px; font-size: 1.5rem; }
+        .house-card { background: rgba(255, 255, 255, 0.05); border-radius: 15px; padding: 15px 10px; text-align: center; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .card-hydro { border-top: 5px solid var(--hydrogen); }
+        .card-nitro { border-top: 5px solid var(--nitrogen); }
+        .card-oxy { border-top: 5px solid var(--oxygen); }
+        .big-score { font-size: 2.2rem; font-weight: 900; margin: 5px 0 15px 0; }
+        .medal-pill { background: rgba(0, 0, 0, 0.4); padding: 4px 0; border-radius: 10px; font-size: 0.75rem; font-weight: 600; display: flex; justify-content: center; align-items: center; gap: 5px; width: 100%; margin-bottom: 4px; }
+        .content-box { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(15px); border-radius: 15px; padding: 20px; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .peserta-card { background: #1a1a1a; border-radius: 10px; margin-bottom: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
+        .header-utama { padding: 15px; cursor: pointer; background: rgba(255,255,255,0.03); transition: 0.3s; }
+        .bottom-nav { position: fixed; bottom: 0; width: 100%; background: rgba(18, 18, 18, 0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.1); z-index: 1000; }
+        .nav-item { text-align: center; color: #888; font-size: 0.75rem; cursor: pointer; flex-grow: 1; text-decoration: none; }
+        .nav-item.active { color: white; }
+        .nav-item i { display: block; font-size: 1.4rem; margin-bottom: 4px; }
+        .modal-content { background: #1a1a1a; color: white; border: 1px solid #333; }
+        .form-select { background-color: #222; color: white; border-color: #444; }
+/* Animasi Pulse */
+@keyframes neonPulse {
+    0% { box-shadow: 0 0 5px var(--pulse-color), 0 0 10px var(--pulse-color); transform: scale(1); }
+    50% { box-shadow: 0 0 20px var(--pulse-color), 0 0 30px var(--pulse-color); transform: scale(1.05); }
+    100% { box-shadow: 0 0 5px var(--pulse-color), 0 0 10px var(--pulse-color); transform: scale(1); }
+}
+
+.leader-active {
+    animation: neonPulse 2s infinite ease-in-out;
+    transition: all 0.5s ease;
+    border: 2px solid var(--pulse-color) !important;
+    font-weight: 800;
+}
+</style>
+</head>
+<body>
+
+    <div id="loading-screen">
+        <div style="position: relative; width: 128px; height: 128px; margin-bottom: 2rem;">
+            <div class="absolute inset-0 bg-purple-400 rounded-full animate-ping-custom" style="position: absolute; inset: 0; background: #c084fc; border-radius: 50%; opacity: 0.2;"></div>
+            <img src="https://www.image2url.com/r2/default/images/1777004127159-eeeb0c89-141c-439e-9650-a0fef2baa72b.png" 
+                 style="position: relative; z-index: 10; width: 100%; height: 100%; object-fit: contain;" alt="Logo e-Koko">
+        </div>
+        <p id="loading-text" style="color: #64748b; font-weight: bold; font-size: 0.8rem; letter-spacing: 0.05em; margin-bottom: 1rem;">
+            Menghidupkan sistem e-Kokurikulum...
+        </p>
+        <div class="loading-bar-bg">
+            <div id="loading-progress"></div>
+        </div>
+        <p id="loading-percentage" style="color: #4f46e5; margin-top: 10px; font-size: 0.8rem; font-weight: 900;">0%</p>
+    </div>
+
+    <div class="app-header">
+        <button onclick="manualRefresh()" style="position: absolute; right: 15px; top: 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.3s;">
+            <i id="refresh-icon" class="fas fa-sync-alt"></i>
+        </button>
+        <h2 class="mb-0">HARI SUKAN 2026</h2>
+    </div>
+
+    <div class="container-fluid px-3 page-section" id="utama-page">
+        <div class="row g-2">
+            <div class="col-4">
+                <div class="house-card card-hydro">
+                    <div style="color:var(--hydrogen); font-weight:bold; font-size:0.8rem;">HYDRO</div>
+                    <div class="big-score" id="score-Hydrogen">0</div>
+                    <div class="medal-pill"><i class="fas fa-medal" style="color:#FFD700"></i><span id="emas-Hydrogen">0</span></div>
+                    <div class="medal-pill"><i class="fas fa-medal" style="color:#C0C0C0"></i><span id="perak-Hydrogen">0</span></div>
+                    <div class="medal-pill"><i class="fas fa-medal" style="color:#CD7F32"></i><span id="gangsa-Hydrogen">0</span></div>
+                    <div class="medal-pill" style="background: rgba(46, 204, 113, 0.2);"><i class="fas fa-people-group text-warning"></i><span id="pb-Hydrogen">0</span></div>
+                    <div class="medal-pill" style="background: rgba(46, 204, 113, 0.2);"><i class="fas fa-star text-warning"></i><span id="sk-Hydrogen">0</span></div>
+                </div>
+            </div>
+
+            <div class="col-4">
+                <div class="house-card card-nitro">
+                    <div style="color:var(--nitrogen); font-weight:bold; font-size:0.8rem;">NITRO</div>
+                    <div class="big-score" id="score-Nitrogen">0</div>
+                    <div class="medal-pill"><i class="fas fa-medal" style="color:#FFD700"></i><span id="emas-Nitrogen">0</span></div>
+                    <div class="medal-pill"><i class="fas fa-medal" style="color:#C0C0C0"></i><span id="perak-Nitrogen">0</span></div>
+                    <div class="medal-pill"><i class="fas fa-medal" style="color:#CD7F32"></i><span id="gangsa-Nitrogen">0</span></div>
+                    <div class="medal-pill" style="background: rgba(52, 152, 219, 0.2);"><i class="fas fa-people-group text-warning"></i><span id="pb-Nitrogen">0</span></div>
+                    <div class="medal-pill" style="background: rgba(52, 152, 219, 0.2);"><i class="fas fa-star text-warning"></i><span id="sk-Nitrogen">0</span></div>
+                </div>
+            </div>
+
+            <div class="col-4">
+                <div class="house-card card-oxy">
+                    <div style="color:var(--oxygen); font-weight:bold; font-size:0.8rem;">OXY</div>
+                    <div class="big-score" id="score-Oxygen">0</div>
+                    <div class="medal-pill"><i class="fas fa-medal" style="color:#FFD700"></i><span id="emas-Oxygen">0</span></div>
+                    <div class="medal-pill"><i class="fas fa-medal" style="color:#C0C0C0"></i><span id="perak-Oxygen">0</span></div>
+                    <div class="medal-pill"><i class="fas fa-medal" style="color:#CD7F32"></i><span id="gangsa-Oxygen">0</span></div>
+                    <div class="medal-pill" style="background: rgba(241, 196, 15, 0.2);"><i class="fas fa-people-group text-warning"></i><span id="pb-Oxygen">0</span></div>
+                    <div class="medal-pill" style="background: rgba(241, 196, 15, 0.2);"><i class="fas fa-star text-warning"></i><span id="sk-Oxygen">0</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress mb-3" style="height: 30px; background: rgba(255,255,255,0.1); border-radius: 15px; overflow: hidden; border: 2px solid rgba(255,255,255,0.05);">
+    
+    <div id="bar-hydro" class="progress-bar" role="progressbar" 
+         style="background-color: #2ecc71; width: 33.3%; transition: width 1s ease-in-out;">
+    </div>
+    
+    <div id="bar-nitro" class="progress-bar" role="progressbar" 
+         style="background-color: #3498db; width: 33.3%; border-left: 1px solid rgba(255,255,255,0.2); border-right: 1px solid rgba(255,255,255,0.2); transition: width 1s ease-in-out;">
+    </div>
+    
+    <div id="bar-oxy" class="progress-bar" role="progressbar" 
+         style="background-color: #f1c40f; width: 33.3%; transition: width 1s ease-in-out;">
+    </div>
+
+</div>
+
+<div class="text-center">
+    <span id="lead-house" class="badge rounded-pill bg-dark py-2 px-4" style="letter-spacing: 2px; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.2);">
+        SEDANG MENGIRA...
+    </span>
+</div>
+
+        <div class="mt-4">
+            <div class="row g-2">
+                <div class="col-6">
+                    <div class="content-box h-100" style="border: 1px solid rgba(52, 152, 219, 0.4); padding: 10px;">
+                        <h6 class="text-info mb-2" style="font-size: 0.75rem;"><i class="fas fa-mars me-1"></i> TOP 5 ATLET LELAKI</h6>
+                        <div id="list-olahragawan" style="font-size: 0.7rem;"></div>
+                    </div>
+                </div>
+                <div class="col-6">
+                    <div class="content-box h-100" style="border: 1px solid rgba(231, 76, 60, 0.4); padding: 10px;">
+                        <h6 class="text-danger mb-2" style="font-size: 0.75rem;"><i class="fas fa-venus me-1"></i> TOP 5 ATLET PEREMPUAN</h6>
+                        <div id="list-olahragawati" style="font-size: 0.7rem;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid px-3 page-section" id="atlet-page" style="display:none;">
+        <h5 class="text-white mb-3">Senarai Atlet</h5>
+        <div class="row g-2 mb-4">
+            <div class="col-4">
+                <div class="house-card p-3 text-center" onclick="tapisAtlet('Hydrogen')" style="cursor:pointer; background: rgba(0,255,255,0.1); border:1px solid var(--hydrogen); border-radius:10px;">
+                    <div style="color:var(--hydrogen); font-weight:bold; font-size:0.7rem;">HYDRO</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="house-card p-3 text-center" onclick="tapisAtlet('Nitrogen')" style="cursor:pointer; background: rgba(255,255,0,0.1); border:1px solid var(--nitrogen); border-radius:10px;">
+                    <div style="color:var(--nitrogen); font-weight:bold; font-size:0.7rem;">NITRO</div>
+                </div>
+            </div>
+            <div class="col-4">
+                <div class="house-card p-3 text-center" onclick="tapisAtlet('Oxygen')" style="cursor:pointer; background: rgba(255,0,0,0.1); border:1px solid var(--oxygen); border-radius:10px;">
+                    <div style="color:var(--oxygen); font-weight:bold; font-size:0.7rem;">OXY</div>
+                </div>
+            </div>
+        </div>
+        <div id="nama-rumah-pilihan" class="mb-3" style="display:none;">
+            <small class="text-white-50">Senarai Atlet Rumah:</small>
+            <h4 id="label-rumah" style="font-weight: bold;"></h4>
+        </div>
+        <div id="senaraiPeserta"><div class="text-center text-white-50 mt-4 small">Sila pilih rumah sukan di atas.</div></div>
+    </div>
+
+    <div id="acara-page" class="page-section d-none p-3">
+        <div class="mb-4">
+            <h4 class="text-white fw-bold">SENARAI ACARA</h4>
+            <div class="input-group mb-3" style="background: rgba(255,255,255,0.1); border-radius: 10px; overflow: hidden; border: 1px solid rgba(255,255,255,0.2);">
+                <span class="input-group-text bg-transparent border-0 text-white-50"><i class="fas fa-search"></i></span>
+                <input type="text" id="inputCarianAcara" class="form-control bg-transparent border-0 text-white small" placeholder="Cari nama acara..." onkeyup="tapisAcara()">
+            </div>
+        </div>
+        <div id="senaraiAcaraHierarki"></div>
+    </div>
+
+   <div style="position: fixed; bottom: 0; width: 100%; z-index: 1000;">
+    <div class="bottom-nav" style="position: relative; border-top: 1px solid rgba(255,255,255,0.1);">
+        <a class="nav-item active" onclick="tukarPage('utama', this)"><i class="fas fa-chart-bar"></i>Utama</a>
+        <a class="nav-item" onclick="tukarPage('atlet', this)"><i class="fas fa-users"></i>Atlet</a>
+        <a class="nav-item" onclick="tukarPage('acara', this)"><i class="fas fa-running"></i>Acara</a>
+    </div>
+    
+    <div style="background: rgba(10, 10, 10, 0.98); text-align: center; padding: 5px 0; font-size: 0.55rem; color: rgba(255, 255, 255, 0.3); border-top: 1px solid rgba(255,255,255,0.05); backdrop-filter: blur(10px);">
+        Digital Hub MPS &copy; 2026 | Kokurikulum Digital
+    </div>
+</div>
+
+    <div class="modal fade" id="modalHakim" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header border-secondary text-info"><h6 class="modal-title" id="judulAcara">Keputusan Acara</h6><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+          <div class="modal-body">
+            <div class="mb-3"><label class="small text-warning">🥇 EMAS (10 Mata)</label><select id="sel-emas" class="form-select"></select></div>
+            <div class="mb-3"><label class="small text-secondary">🥈 PERAK (7 Mata)</label><select id="sel-perak" class="form-select"></select></div>
+            <div class="mb-3"><label class="small text-danger">🥉 GANGSA (4 Mata)</label><select id="sel-gangsa" class="form-select"></select></div>
+            <button id="btnHantar" class="btn btn-primary w-100 fw-bold mt-2" onclick="simpanKeputusan()">SAHKAN KEPUTUSAN</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const apiURL = 'https://script.google.com/macros/s/AKfycbw5vHwnUu6sJlP0cWSgxDA8fQt613IdqpzR6bTKVAm1McQspe_VI5ouXfZjhblcBpTQ-Q/exec';
+    window.pesertaTerkumpul = []; window.mapAcaraHierarki = {}; window.mapKeputusan = {}; window.isDataReady = false;
+
+    window.addEventListener('load', async () => {
+        updateLoadingBar(10, "Menyambung ke Hub...");
+        try {
+            updateLoadingBar(30, "Menyemak markah semasa...");
+            await muatTurunMarkah(); 
+            
+            updateLoadingBar(60, "Mengemaskini pangkalan data...");
+            await muatSemuaData(); 
+            
+            updateLoadingBar(100, "Sistem Sedia!");
+        } catch (e) {
+            console.warn("Gangguan sambungan, memulakan sistem...");
+        } finally {
+            setTimeout(() => {
+                const screen = document.getElementById('loading-screen');
+                if(screen) {
+                    screen.style.opacity = '0';
+                    setTimeout(() => screen.style.display = 'none', 600);
+                }
+            }, 1000);
+        }
+    });
+
+    function updateLoadingBar(percent, text) {
+        const bar = document.getElementById('loading-progress');
+        const pText = document.getElementById('loading-percentage');
+        const lText = document.getElementById('loading-text');
+        if(bar) bar.style.width = percent + '%';
+        if(pText) pText.innerText = percent + '%';
+        if(lText && text) lText.innerText = text;
+    }
+
+    function muatTurunMarkah() {
+    return new Promise((resolve) => {
+        fetch(apiURL).then(res => res.json()).then(data => {
+            let normalizedData = {};
+            for (let key in data) {
+                normalizedData[key.toLowerCase()] = data[key];
+            }
+
+            for (let r in data) {
+                const scoreEl = document.getElementById('score-' + r);
+                if (scoreEl) {
+                    let nilaiLama = parseInt(scoreEl.innerText) || 0;
+                    let nilaiBaru = data[r].jumlah || 0;
+                    animateScore('score-' + r, nilaiLama, nilaiBaru, 1000);
+
+                    if(document.getElementById('emas-' + r)) document.getElementById('emas-' + r).innerText = data[r].emas || 0;
+                    if(document.getElementById('perak-' + r)) document.getElementById('perak-' + r).innerText = data[r].perak || 0;
+                    if(document.getElementById('gangsa-' + r)) document.getElementById('gangsa-' + r).innerText = data[r].gangsa || 0;
+                    if(document.getElementById('pb-' + r)) document.getElementById('pb-' + r).innerText = data[r].pb || 0;
+                    if(document.getElementById('sk-' + r)) document.getElementById('sk-' + r).innerText = data[r].sk || 0;
+                }
+            }
+
+            let hMarkah = (normalizedData["hydrogen"]) ? normalizedData["hydrogen"].jumlah : 0;
+            let nMarkah = (normalizedData["nitrogen"]) ? normalizedData["nitrogen"].jumlah : 0;
+            let oMarkah = (normalizedData["oxygen"]) ? normalizedData["oxygen"].jumlah : 0;
+            let total = hMarkah + nMarkah + oMarkah;
+
+            if(total > 0) {
+                if(document.getElementById('bar-hydro')) document.getElementById('bar-hydro').style.width = (hMarkah/total*100) + '%';
+                if(document.getElementById('bar-nitro')) document.getElementById('bar-nitro').style.width = (nMarkah/total*100) + '%';
+                if(document.getElementById('bar-oxy')) document.getElementById('bar-oxy').style.width = (oMarkah/total*100) + '%';
+                
+                let houses = [{n:'HYDROGEN', v:hMarkah}, {n:'NITROGEN', v:nMarkah}, {n:'OXYGEN', v:oMarkah}];
+                houses.sort((a,b) => b.v - a.v);
+
+                let leadEl = document.getElementById('lead-house');
+                if(leadEl) {
+                    let winner = houses[0]; 
+                    leadEl.innerText = "👑 " + winner.n + " MENDAHULUI! 👑";
+
+                    let pulseColor;
+                    if(winner.n === 'HYDROGEN') pulseColor = '#2ecc71';
+                    else if(winner.n === 'NITROGEN') pulseColor = '#3498db';
+                    else pulseColor = '#f1c40f';
+
+                    leadEl.style.setProperty('--pulse-color', pulseColor);
+                    leadEl.style.color = pulseColor;
+                    leadEl.classList.add('leader-active');
+                }
+            }
+            resolve(); // Selesaikan Promise selepas semua data diproses
+        }).catch(e => { 
+            console.log(e); 
+            resolve(); 
+        });
+    });
+}
+
+    function muatSemuaData() {
+        return new Promise((resolve) => {
+            fetch(apiURL + '?action=getPeserta').then(res => res.json()).then(resData => {
+                let data = resData.peserta || [];
+                let keputusan = resData.keputusan || [];
+                window.mapKeputusan = {};
+                keputusan.forEach(k => { window.mapKeputusan[k.acara + "|" + k.kategori] = k; });
+
+                let dictP = {};
+                data.forEach(p => {
+                    if(!p.nama || p.nama.trim() === "" || p.nama === "SUKANEKA") return;
+                    let key = p.nama.trim();
+                    if(!dictP[key]) dictP[key] = { nama: key, rumah: (p.rumah || "").trim(), kategori: p.kategori || "", ind: [], kump: [] };
+                    if(p.jenis && p.jenis.toLowerCase().includes("kump")) {
+                        if(!dictP[key].kump.includes(p.acara)) dictP[key].kump.push(p.acara);
+                    } else {
+                        if(!dictP[key].ind.includes(p.acara)) dictP[key].ind.push(p.acara);
+                    }
+                });
+                window.pesertaTerkumpul = Object.values(dictP);
+                window.isDataReady = true;
+
+                window.mapAcaraHierarki = {};
+                data.forEach(p => {
+                    if(!p.acara) return;
+                    if(!window.mapAcaraHierarki[p.acara]) window.mapAcaraHierarki[p.acara] = {};
+                    if(!window.mapAcaraHierarki[p.acara][p.kategori]) window.mapAcaraHierarki[p.acara][p.kategori] = [];
+                    window.mapAcaraHierarki[p.acara][p.kategori].push({ nama: p.nama, rumah: p.rumah, jenis: p.jenis });
+                });
+                paparkanAcara(window.mapAcaraHierarki);
+                hitungTopAthlete(keputusan);
+                resolve();
+            }).catch(err => { console.log(err); resolve(); });
+        });
+    }
+
+    function tukarPage(id, el) {
+        document.querySelectorAll('.page-section').forEach(p => { p.classList.add('d-none'); p.style.display = 'none'; });
+        const target = document.getElementById(id + '-page');
+        if (target) { target.classList.remove('d-none'); target.style.display = 'block'; }
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        if(el) el.classList.add('active');
+    }
+
+    function tapisAtlet(rumah) {
+        const container = document.getElementById('senaraiPeserta');
+        const labelRumah = document.getElementById('label-rumah');
+        const labelBekas = document.getElementById('nama-rumah-pilihan');
+        if(labelBekas) labelBekas.style.display = 'block';
+        if(labelRumah) { labelRumah.innerText = rumah.toUpperCase(); labelRumah.style.color = `var(--${rumah.toLowerCase()})`; }
+        const rCari = rumah.toLowerCase().trim();
+        const filtered = window.pesertaTerkumpul.filter(p => p.rumah && p.rumah.toLowerCase().trim() === rCari);
+        paparkanPeserta(filtered);
+    }
+
+    function paparkanPeserta(arr) {
+        const c = document.getElementById('senaraiPeserta'); c.innerHTML = '';
+        if (arr.length === 0) { c.innerHTML = '<div class="text-center text-white-50 py-4 small">Tiada peserta.</div>'; return; }
+        
+        arr.forEach((p, i) => {
+            let r = p.rumah.toLowerCase();
+            let col = r.includes('hydro') ? 'var(--hydrogen)' : (r.includes('nitro') ? 'var(--nitrogen)' : 'var(--oxygen)');
+            
+            // Logik untuk paparkan medal bagi acara Individu
+            let indHTML = p.ind.map(ac => {
+                let key = ac + "|" + p.kategori;
+                let keputusan = window.mapKeputusan[key];
+                let medal = "";
+                
+                if(keputusan) {
+                    if(keputusan.nE === p.nama) medal = " 🥇";
+                    else if(keputusan.nP === p.nama) medal = " 🥈";
+                    else if(keputusan.nG === p.nama) medal = " 🥉";
+                }
+                return `<div style="font-size:0.8rem">${ac}${medal}</div>`;
+            }).join('') || '-';
+
+            // Logik untuk paparkan medal bagi acara Kumpulan (Berdasarkan Rumah)
+            let kumpHTML = p.kump.map(ac => {
+                let key = ac + "|" + p.kategori;
+                let keputusan = window.mapKeputusan[key];
+                let medal = "";
+                
+                if(keputusan) {
+                    // Untuk kumpulan, kita check rumah sebab biasanya nE simpan nama rumah
+                    if(keputusan.rE === p.rumah) medal = " 🥇";
+                    else if(keputusan.rP === p.rumah) medal = " 🥈";
+                    else if(keputusan.rG === p.rumah) medal = " 🥉";
+                }
+                return `<div style="font-size:0.8rem">${ac}${medal}</div>`;
+            }).join('') || '-';
+
+            c.innerHTML += `<div class="peserta-card mb-2" style="border-left:4px solid ${col}; background: rgba(255,255,255,0.05); border-radius: 8px;">
+                <div class="header-utama d-flex justify-content-between p-3" data-bs-toggle="collapse" data-bs-target="#atlet-${i}" style="cursor:pointer">
+                    <div><div class="fw-bold small text-white">${p.nama}</div><small class="text-white-50" style="font-size:0.65rem">${p.kategori}</small></div>
+                    <i class="fas fa-chevron-down text-white-50 small"></i>
+                </div>
+                <div id="atlet-${i}" class="collapse p-3 bg-black border-top border-secondary">
+                    <div class="mb-2"><small class="text-info d-block fw-bold" style="font-size:0.6rem;">INDIVIDU</small><div class="text-white">${indHTML}</div></div>
+                    <div><small class="text-warning d-block fw-bold" style="font-size:0.6rem;">KUMPULAN</small><div class="text-white">${kumpHTML}</div></div>
+                </div>
+            </div>`;
+        });
+    }
+
+    function paparkanAcara(obj) {
+        const c = document.getElementById('senaraiAcaraHierarki'); 
+        if(!c) return;
+        c.innerHTML = '';
+        const senaraiAcara = Object.keys(obj).sort();
+        if (senaraiAcara.length === 0) { c.innerHTML = '<div class="text-center text-white-50 py-5">Memuatkan senarai acara...</div>'; return; }
+
+        senaraiAcara.forEach((ac, i) => {
+            let katHTML = '';
+            Object.keys(obj[ac]).sort().forEach((kt) => {
+                let mList = obj[ac][kt];
+                let key = ac + "|" + kt;
+                let adaKeputusan = window.mapKeputusan[key];
+                let winHTML = adaKeputusan ? `<div class="mt-3 p-2 rounded" style="background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);"><div class="d-flex align-items-center mb-1"><span class="me-2">🥇</span><span class="text-white fw-bold" style="font-size:0.7rem">${adaKeputusan.nE}</span><span class="ms-auto badge bg-primary" style="font-size:0.6rem">${adaKeputusan.rE}</span></div><div class="d-flex align-items-center mb-1"><span class="me-2">🥈</span><span class="text-white-50" style="font-size:0.7rem">${adaKeputusan.nP}</span></div><div class="d-flex align-items-center"><span class="me-2">🥉</span><span class="text-white-50" style="font-size:0.7rem">${adaKeputusan.nG}</span></div></div>` : '';
+
+                katHTML += `<div class="category-item mb-4 pb-2 border-bottom border-secondary border-opacity-25"><div class="d-flex justify-content-between align-items-center mb-2"><h6 class="text-info mb-0 fw-bold" style="letter-spacing:1px; font-size:0.75rem;"><i class="fas fa-layer-group me-2"></i>${kt}</h6><button class="btn btn-sm ${adaKeputusan ? 'btn-success' : 'btn-outline-info'} px-3" onclick="bukaHakim('${ac}','${kt}')" style="font-size: 0.7rem; border-radius: 20px; font-weight:bold;"><i class="fas ${adaKeputusan ? 'fa-check-double' : 'fa-edit'} me-1"></i>${adaKeputusan ? 'KEMASKINI' : 'ISI'}</button></div><div class="ps-3 border-start border-info border-2"><div class="text-white-50 mb-1" style="font-size: 0.65rem; text-transform: uppercase; letter-spacing:1px;">Peserta:</div><div class="d-flex flex-wrap gap-2">${mList.map(m => { let r = (m.rumah || "").toLowerCase(); let color = r.includes('hydro') ? "var(--hydrogen)" : (r.includes('nitro') ? "var(--nitrogen)" : (r.includes('oxy') ? "var(--oxygen)" : "gray")); return `<span class="badge d-flex align-items-center" style="background: rgba(0,0,0,0.5); border: 1px solid ${color}; color: ${color}; padding: 5px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 500;"><i class="fas fa-user-circle me-1" style="font-size:0.65rem"></i>${m.nama}</span>`; }).join('')}</div>${winHTML}</div></div>`;
+            });
+
+            c.innerHTML += `<div class="acara-card mb-3" data-acara-name="${ac.toLowerCase()}" style="background: rgba(255,255,255,0.03); border-radius: 12px; overflow: hidden; border: 1px solid rgba(255,255,255,0.05);"><div class="p-3 d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#ac-${i}" style="cursor:pointer"><div class="d-flex align-items-center"><div class="icon-box me-3 text-center" style="width:35px; height:35px; line-height:35px; background:rgba(0,255,255,0.1); border-radius:8px;"><i class="fas fa-running text-info" style="font-size:0.8rem"></i></div><h6 class="mb-0 text-white fw-bold text-uppercase" style="font-size:0.8rem;">${ac}</h6></div><i class="fas fa-chevron-down text-white-50" style="font-size:0.75rem"></i></div><div id="ac-${i}" class="collapse p-3" style="background: rgba(0,0,0,0.15);">${katHTML}</div></div>`;
+        });
+    }
+
+    function tapisAcara() {
+        let input = document.getElementById('inputCarianAcara').value.toLowerCase();
+        document.querySelectorAll('.acara-card').forEach(card => card.style.display = card.getAttribute('data-acara-name').includes(input) ? 'block' : 'none');
+    }
+
+    function bukaHakim(ac, kt) {
+        let pin = prompt("PIN Hakim:"); if (pin !== "2026") return;
+        window.acaraAktif = ac; window.kategoriAktif = kt;
+        document.getElementById('judulAcara').innerText = ac + " (" + kt + ")";
+        let muridList = (window.mapAcaraHierarki[ac] && window.mapAcaraHierarki[ac][kt]) ? window.mapAcaraHierarki[ac][kt] : [];
+        let isKump = kt.toUpperCase().includes("KHAS") || kt.toUpperCase().includes("BERKUMPULAN");
+        let opt = '<option value="">-- Pilih --</option>';
+        if (isKump) ["Hydrogen","Nitrogen","Oxygen"].forEach(r => opt += `<option value="${r}|${r}">${r}</option>`);
+        else muridList.forEach(m => opt += `<option value="${m.nama}|${m.rumah}">${m.nama} (${m.rumah})</option>`);
+        ['sel-emas','sel-perak','sel-gangsa'].forEach(id => document.getElementById(id).innerHTML = opt);
+        new bootstrap.Modal(document.getElementById('modalHakim')).show();
+    }
+
+    function simpanKeputusan() {
+        let e = document.getElementById('sel-emas').value.split('|'), 
+            p = document.getElementById('sel-perak').value.split('|'), 
+            g = document.getElementById('sel-gangsa').value.split('|');
+        if(!e[0] || !p[0] || !g[0]) return alert("Lengkapkan maklumat pemenang!");
+        const btn = document.getElementById('btnHantar');
+        const originalText = btn.innerText;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Menyimpan...';
+
+        fetch(apiURL, { 
+            method: 'POST', 
+            body: JSON.stringify({ pin: "2026", acara: window.acaraAktif, kategori: window.kategoriAktif, nE: e[0], rE: e[1], nP: p[0], rP: p[1], nG: g[0], rG: g[1] }) 
+        })
+        .then(res => res.json())
+        .then(res => { 
+            if(res.status === "success") {
+                bootstrap.Modal.getInstance(document.getElementById('modalHakim')).hide();
+                alert("✅ Keputusan disimpan.");
+                muatTurunMarkah(); muatSemuaData();
+            } 
+        })
+        .catch(err => alert("Ralat server."))
+        .finally(() => { btn.disabled = false; btn.innerText = originalText; });
+    }
+
+    function hitungTopAthlete(keputusan) {
+        if(!keputusan) return;
+        let lMap = {}, pMap = {};
+        keputusan.forEach(k => {
+            let winners = [{n: k.nE, r: k.rE, m: 10}, {n: k.nP, r: k.rP, m: 7}, {n: k.nG, r: k.rG, m: 4}];
+            let targetMap = (k.kategori || "").toUpperCase().includes('L') ? lMap : pMap;
+            winners.forEach(w => {
+                if(w.n && !["Hydrogen", "Nitrogen", "Oxygen"].includes(w.n)) {
+                    if(!targetMap[w.n]) targetMap[w.n] = { nama: w.n, rumah: w.r, e:0, p:0, g:0, mata:0 };
+                    if(w.m===10) targetMap[w.n].e++; if(w.m===7) targetMap[w.n].p++; if(w.m===4) targetMap[w.n].g++;
+                    targetMap[w.n].mata += w.m;
+                }
+            });
+        });
+        const sortAt = (m) => Object.values(m).sort((a,b) => b.mata - a.mata).slice(0,5);
+        renderTop(sortAt(lMap), 'list-olahragawan');
+        renderTop(sortAt(pMap), 'list-olahragawati');
+    }
+
+    function renderTop(list, id) {
+        const el = document.getElementById(id); if(!el) return;
+        if(list.length === 0) { el.innerHTML = '<div class="small text-white-50">Tiada data.</div>'; return; }
+        el.innerHTML = list.map((a, i) => `<div class="mb-2 pb-1 border-bottom border-secondary"><div class="fw-bold small text-white">${i+1}. ${a.nama}</div><div class="d-flex justify-content-between" style="font-size:0.65rem"><span style="color:var(--${a.rumah.toLowerCase()})">${a.rumah}</span><span>${a.e}🥇 ${a.p}🥈 ${a.g}🥉</span></div></div>`).join('');
+    }
+
+    async function manualRefresh() {
+        const icon = document.getElementById('refresh-icon');
+        const screen = document.getElementById('loading-screen');
+        icon.classList.add('fa-spin');
+        screen.style.display = 'flex'; screen.style.opacity = '1';
+        updateLoadingBar(10, "Menyemak data terkini...");
+        try {
+            await muatTurunMarkah();
+            await muatSemuaData();
+            updateLoadingBar(100, "Selesai!");
+            setTimeout(() => {
+                screen.style.opacity = '0';
+                setTimeout(() => { screen.style.display = 'none'; icon.classList.remove('fa-spin'); }, 600);
+            }, 800);
+        } catch (e) {
+            alert("Gagal mengemaskini.");
+            screen.style.display = 'none'; icon.classList.remove('fa-spin');
+        }
+    }
+
+    function animateScore(id, start, end, duration) {
+        const obj = document.getElementById(id);
+        if (!obj) return;
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            obj.innerText = Math.floor(progress * (end - start) + start);
+            if (progress < 1) window.requestAnimationFrame(step);
+            else obj.innerText = end;
+        };
+        window.requestAnimationFrame(step);
+    }
+</script>
