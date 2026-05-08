@@ -331,15 +331,19 @@
     function muatSemuaData() {
     return new Promise((resolve) => {
         fetch(apiURL + '?action=getPeserta').then(res => res.json()).then(resData => {
-            // TUKAR DI SINI: Simpan ke window.dataPeserta supaya fungsi lain boleh baca
-            window.dataPeserta = resData.peserta || []; 
-            let keputusan = resData.keputusan || [];
+            // --- LANGKAH 1 (DI SINI) ---
+            // Kita simpan array keputusan ke window supaya paparkanPeserta boleh baca
+            window.dataKeputusan = resData.keputusan || []; 
             
+            window.dataPeserta = resData.peserta || []; 
+            
+            // Simpan dalam bentuk Map untuk kegunaan paparkanAcara
             window.mapKeputusan = {};
-            keputusan.forEach(k => { window.mapKeputusan[k.acara + "|" + k.kategori] = k; });
+            window.dataKeputusan.forEach(k => { 
+                window.mapKeputusan[k.acara + "|" + k.kategori] = k; 
+            });
 
             let dictP = {};
-            // Guna window.dataPeserta di sini juga
             window.dataPeserta.forEach(p => {
                 if(!p.nama || p.nama.trim() === "" || p.nama === "SUKANEKA") return;
                 let key = p.nama.trim();
@@ -360,8 +364,9 @@
                 if(!window.mapAcaraHierarki[p.acara][p.kategori]) window.mapAcaraHierarki[p.acara][p.kategori] = [];
                 window.mapAcaraHierarki[p.acara][p.kategori].push({ nama: p.nama, rumah: p.rumah, jenis: p.jenis });
             });
+            
             paparkanAcara(window.mapAcaraHierarki);
-            hitungTopAthlete(keputusan);
+            hitungTopAthlete(window.dataKeputusan); // Guna window data
             resolve();
         }).catch(err => { console.log(err); resolve(); });
     });
@@ -391,45 +396,37 @@
     if(!c) return;
     c.innerHTML = '';
     
+    // Ambil data dari window yang kita set kat Langkah 1 tadi
+    const dataKep = window.dataKeputusan || [];
+
     arr.forEach((p, i) => {
         let r = (p.rumah || "").toLowerCase();
         let col = r.includes('hydro') ? 'var(--hydrogen)' : (r.includes('nitro') ? 'var(--nitrogen)' : 'var(--oxygen)');
         
         const semakMedal = (namaAcara, kategori, namaMurid, rumahMurid) => {
-            // Kita guna window.mapKeputusan yang sepatutnya dah diisi di muatSemuaData
-            if(!window.mapKeputusan) return "";
+            if(dataKep.length === 0) return "";
             
-            // 1. Standardkan Kunci Carian (Contoh: "TARIK TALI|T6L")
-            let cariKey = (namaAcara.trim() + "|" + kategori.trim()).toUpperCase();
-            let dataMenang = null;
+            // Cari keputusan yang sepadan dengan Acara DAN Kategori
+            let kep = dataKep.find(k => 
+                String(k.acara).trim().toUpperCase() === String(namaAcara).trim().toUpperCase() &&
+                String(k.kategori).trim().toUpperCase() === String(kategori).trim().toUpperCase()
+            );
 
-            // Cari dalam mapKeputusan
-            for (let k in window.mapKeputusan) {
-                if (k.toUpperCase().trim() === cariKey) {
-                    dataMenang = window.mapKeputusan[k];
-                    break;
-                }
-            }
+            if(!kep) return "";
             
-            if(!dataMenang) return "";
+            // Bersihkan data pemenang
+            let nE = String(kep.nE || "").trim().toUpperCase();
+            let nP = String(kep.nP || "").trim().toUpperCase();
+            let nG = String(kep.nG || "").trim().toUpperCase();
+            let nA = String(namaMurid || "").trim().toUpperCase();
+            let rA = String(rumahMurid || "").trim().toUpperCase();
             
-            // 2. Standardkan Nama & Rumah (Trim & UpperCase adalah WAJIB)
-            let pE = (dataMenang.nE || "").trim().toUpperCase();
-            let pP = (dataMenang.nP || "").trim().toUpperCase();
-            let pG = (dataMenang.nG || "").trim().toUpperCase();
-            
-            let nAtlet = (namaMurid || "").trim().toUpperCase();
-            let rAtlet = (rumahMurid || "").trim().toUpperCase();
+            const senaraiRumah = ["HYDROGEN", "NITROGEN", "OXYGEN"];
 
-            // Senarai nama rumah untuk pengecaman acara kumpulan
-            const rumahSukan = ["HYDROGEN", "NITROGEN", "OXYGEN"];
-
-            // 3. Logik Padanan Medal
-            // Syarat: Nama individu sama OR (Pemenang adalah Nama Rumah DAN murid dari rumah tersebut)
-            if (pE === nAtlet || (rumahSukan.includes(pE) && pE === rAtlet)) return " 🥇";
-            if (pP === nAtlet || (rumahSukan.includes(pP) && pP === rAtlet)) return " 🥈";
-            if (pG === nAtlet || (rumahSukan.includes(pG) && pG === rAtlet)) return " 🥉";
-            
+            // LOGIK: Individu menang ATAU (Rumah menang DAN murid dari rumah tu)
+            if(nE === nA || (senaraiRumah.includes(nE) && nE === rA)) return " 🥇";
+            if(nP === nA || (senaraiRumah.includes(nP) && nP === rA)) return " 🥈";
+            if(nG === nA || (senaraiRumah.includes(nG) && nG === rA)) return " 🥉";
             return "";
         };
 
@@ -441,20 +438,19 @@
                 <div class="p-3 d-flex justify-content-between align-items-center" data-bs-toggle="collapse" data-bs-target="#atlet-${i}" style="cursor:pointer">
                     <div>
                         <div class="fw-bold small text-white">${p.nama}</div>
-                        <small class="text-white-50" style="font-size:0.6rem; text-transform:uppercase;">${p.kategori} | ${p.rumah}</small>
+                        <small class="text-white-50" style="font-size:0.6rem">${p.kategori} | ${p.rumah.toUpperCase()}</small>
                     </div>
                     <i class="fas fa-chevron-down text-white-50 small"></i>
                 </div>
                 <div id="atlet-${i}" class="collapse p-3 bg-black border-top border-secondary">
-                    <div class="mb-2 text-info small fw-bold" style="font-size:0.65rem; letter-spacing:1px;">ACARA INDIVIDU</div>
-                    <div class="text-white small mb-3" style="line-height:1.5">${indHTML}</div>
-                    <div class="mb-2 text-warning small fw-bold" style="font-size:0.65rem; letter-spacing:1px;">ACARA KUMPULAN</div>
-                    <div class="text-white small" style="line-height:1.5">${kumpHTML}</div>
+                    <div class="mb-2 text-info small fw-bold">ACARA INDIVIDU</div>
+                    <div class="text-white small mb-3">${indHTML}</div>
+                    <div class="mb-2 text-warning small fw-bold">ACARA KUMPULAN</div>
+                    <div class="text-white small">${kumpHTML}</div>
                 </div>
             </div>`;
     });
 }
-
     function paparkanAcara(obj) {
         const c = document.getElementById('senaraiAcaraHierarki'); 
         if(!c) return;
