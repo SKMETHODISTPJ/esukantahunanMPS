@@ -329,40 +329,43 @@
 }
 
     function muatSemuaData() {
-        return new Promise((resolve) => {
-            fetch(apiURL + '?action=getPeserta').then(res => res.json()).then(resData => {
-                let data = resData.peserta || [];
-                let keputusan = resData.keputusan || [];
-                window.mapKeputusan = {};
-                keputusan.forEach(k => { window.mapKeputusan[k.acara + "|" + k.kategori] = k; });
+    return new Promise((resolve) => {
+        fetch(apiURL + '?action=getPeserta').then(res => res.json()).then(resData => {
+            // TUKAR DI SINI: Simpan ke window.dataPeserta supaya fungsi lain boleh baca
+            window.dataPeserta = resData.peserta || []; 
+            let keputusan = resData.keputusan || [];
+            
+            window.mapKeputusan = {};
+            keputusan.forEach(k => { window.mapKeputusan[k.acara + "|" + k.kategori] = k; });
 
-                let dictP = {};
-                data.forEach(p => {
-                    if(!p.nama || p.nama.trim() === "" || p.nama === "SUKANEKA") return;
-                    let key = p.nama.trim();
-                    if(!dictP[key]) dictP[key] = { nama: key, rumah: (p.rumah || "").trim(), kategori: p.kategori || "", ind: [], kump: [] };
-                    if(p.jenis && p.jenis.toLowerCase().includes("kump")) {
-                        if(!dictP[key].kump.includes(p.acara)) dictP[key].kump.push(p.acara);
-                    } else {
-                        if(!dictP[key].ind.includes(p.acara)) dictP[key].ind.push(p.acara);
-                    }
-                });
-                window.pesertaTerkumpul = Object.values(dictP);
-                window.isDataReady = true;
+            let dictP = {};
+            // Guna window.dataPeserta di sini juga
+            window.dataPeserta.forEach(p => {
+                if(!p.nama || p.nama.trim() === "" || p.nama === "SUKANEKA") return;
+                let key = p.nama.trim();
+                if(!dictP[key]) dictP[key] = { nama: key, rumah: (p.rumah || "").trim(), kategori: p.kategori || "", ind: [], kump: [] };
+                if(p.jenis && p.jenis.toLowerCase().includes("kump")) {
+                    if(!dictP[key].kump.includes(p.acara)) dictP[key].kump.push(p.acara);
+                } else {
+                    if(!dictP[key].ind.includes(p.acara)) dictP[key].ind.push(p.acara);
+                }
+            });
+            window.pesertaTerkumpul = Object.values(dictP);
+            window.isDataReady = true;
 
-                window.mapAcaraHierarki = {};
-                data.forEach(p => {
-                    if(!p.acara) return;
-                    if(!window.mapAcaraHierarki[p.acara]) window.mapAcaraHierarki[p.acara] = {};
-                    if(!window.mapAcaraHierarki[p.acara][p.kategori]) window.mapAcaraHierarki[p.acara][p.kategori] = [];
-                    window.mapAcaraHierarki[p.acara][p.kategori].push({ nama: p.nama, rumah: p.rumah, jenis: p.jenis });
-                });
-                paparkanAcara(window.mapAcaraHierarki);
-                hitungTopAthlete(keputusan);
-                resolve();
-            }).catch(err => { console.log(err); resolve(); });
-        });
-    }
+            window.mapAcaraHierarki = {};
+            window.dataPeserta.forEach(p => {
+                if(!p.acara) return;
+                if(!window.mapAcaraHierarki[p.acara]) window.mapAcaraHierarki[p.acara] = {};
+                if(!window.mapAcaraHierarki[p.acara][p.kategori]) window.mapAcaraHierarki[p.acara][p.kategori] = [];
+                window.mapAcaraHierarki[p.acara][p.kategori].push({ nama: p.nama, rumah: p.rumah, jenis: p.jenis });
+            });
+            paparkanAcara(window.mapAcaraHierarki);
+            hitungTopAthlete(keputusan);
+            resolve();
+        }).catch(err => { console.log(err); resolve(); });
+    });
+}
 
     function tukarPage(id, el) {
         document.querySelectorAll('.page-section').forEach(p => { p.classList.add('d-none'); p.style.display = 'none'; });
@@ -393,17 +396,13 @@
         let col = r.includes('hydro') ? 'var(--hydrogen)' : (r.includes('nitro') ? 'var(--nitrogen)' : 'var(--oxygen)');
         
         const semakMedal = (namaAcara, kategori, namaMurid, rumahMurid) => {
-            if(!window.dataKeputusan) return "";
-            
-            // Cari keputusan bagi acara & kategori ini
-            let kep = window.dataKeputusan.find(k => 
-                String(k.acara).trim().toUpperCase() === String(namaAcara).trim().toUpperCase() && 
-                String(k.kategori).trim().toUpperCase() === String(kategori).trim().toUpperCase()
-            );
+            // Gunakan mapKeputusan yang sudah kita bina di muatSemuaData
+            let key = namaAcara + "|" + kategori;
+            let kep = window.mapKeputusan ? window.mapKeputusan[key] : null;
             
             if(!kep) return "";
             
-            // Logik: Individu menang ATAU Rumah menang (Kumpulan)
+            // Cek jika nama murid menang ATAU jika rumah menang dalam acara kumpulan
             if(kep.nE === namaMurid || (["Hydrogen","Nitrogen","Oxygen"].includes(kep.nE) && kep.rE === rumahMurid)) return " 🥇";
             if(kep.nP === namaMurid || (["Hydrogen","Nitrogen","Oxygen"].includes(kep.nP) && kep.rP === rumahMurid)) return " 🥈";
             if(kep.nG === namaMurid || (["Hydrogen","Nitrogen","Oxygen"].includes(kep.nG) && kep.rG === rumahMurid)) return " 🥉";
