@@ -464,11 +464,31 @@
         let pin = prompt("PIN Hakim:"); if (pin !== "2026") return;
         window.acaraAktif = ac; window.kategoriAktif = kt;
         document.getElementById('judulAcara').innerText = ac + " (" + kt + ")";
+        
+        // 1. Ambil senarai murid untuk acara/kategori ini
         let muridList = (window.mapAcaraHierarki[ac] && window.mapAcaraHierarki[ac][kt]) ? window.mapAcaraHierarki[ac][kt] : [];
-        let isKump = kt.toUpperCase().includes("KHAS") || kt.toUpperCase().includes("BERKUMPULAN");
+        
+        // 2. LOGIK AUTOMATIK: 
+        // Kita semak murid pertama dalam senarai tu, apa "jenis" acara dia?
+        // Kalau "Kumpulan", "Berkumpulan", atau "Khas", terus tukar kepada pilihan Rumah.
+        let isKump = false;
+        if (muridList.length > 0) {
+            let jenis = muridList[0].jenis.toUpperCase();
+            if (jenis.includes("KUMPULAN") || jenis.includes("KHAS") || jenis.includes("BERKUMPULAN")) {
+                isKump = true;
+            }
+        }
+
         let opt = '<option value="">-- Pilih --</option>';
-        if (isKump) ["Hydrogen","Nitrogen","Oxygen"].forEach(r => opt += `<option value="${r}|${r}">${r}</option>`);
-        else muridList.forEach(m => opt += `<option value="${m.nama}|${m.rumah}">${m.nama} (${m.rumah})</option>`);
+        
+        if (isKump) {
+            // Jika acara dikesan sebagai KUMPULAN
+            ["Hydrogen","Nitrogen","Oxygen"].forEach(r => opt += `<option value="${r}|${r}">${r}</option>`);
+        } else {
+            // Jika acara dikesan sebagai INDIVIDU
+            muridList.forEach(m => opt += `<option value="${m.nama}|${m.rumah}">${m.nama} (${m.rumah})</option>`);
+        }
+        
         ['sel-emas','sel-perak','sel-gangsa'].forEach(id => document.getElementById(id).innerHTML = opt);
         new bootstrap.Modal(document.getElementById('modalHakim')).show();
     }
