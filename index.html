@@ -538,11 +538,39 @@
         renderTop(sortAt(pMap), 'list-olahragawati');
     }
 
-    function renderTop(list, id) {
-        const el = document.getElementById(id); if(!el) return;
-        if(list.length === 0) { el.innerHTML = '<div class="small text-white-50">Tiada data.</div>'; return; }
-        el.innerHTML = list.map((a, i) => `<div class="mb-2 pb-1 border-bottom border-secondary"><div class="fw-bold small text-white">${i+1}. ${a.nama}</div><div class="d-flex justify-content-between" style="font-size:0.65rem"><span style="color:var(--${a.rumah.toLowerCase()})">${a.rumah}</span><span>${a.e}🥇 ${a.p}🥈 ${a.g}🥉</span></div></div>`).join('');
+    function renderTop(arr, id) {
+    const list = document.getElementById(id);
+    if (!list) return;
+    list.innerHTML = '';
+    if (arr.length === 0) {
+        list.innerHTML = '<div class="text-center text-white-50 py-3 small">Tiada data.</div>';
+        return;
     }
+    arr.forEach((atlet, i) => {
+        let col = (atlet.rumah || "").toLowerCase().includes('hydro') ? 'var(--hydrogen)' : 
+                  ((atlet.rumah || "").toLowerCase().includes('nitro') ? 'var(--nitrogen)' : 'var(--oxygen)');
+        
+        list.innerHTML += `
+            <div class="d-flex align-items-center mb-3 p-2" style="background: rgba(255,255,255,0.05); border-radius: 12px; border-left: 4px solid ${col}">
+                <div class="me-3 text-center" style="width: 30px;">
+                    <span class="fw-bold" style="color: ${col}">#${i + 1}</span>
+                </div>
+                <div class="flex-grow-1">
+                    <div class="fw-bold small text-white">${atlet.nama}</div>
+                    <div class="d-flex gap-3 mt-1">
+                        <span class="small" style="font-size: 0.7rem;">🥇 ${atlet.e || 0}</span>
+                        <span class="small" style="font-size: 0.7rem;">🥈 ${atlet.p || 0}</span>
+                        <span class="small" style="font-size: 0.7rem;">🥉 ${atlet.g || 0}</span>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <div class="fw-bold text-white" style="font-size: 0.9rem;">${atlet.mata}</div>
+                    <div class="text-white-50" style="font-size: 0.6rem; letter-spacing: 1px;">MATA</div>
+                </div>
+            </div>
+        `;
+    });
+}
 
     async function manualRefresh() {
         const icon = document.getElementById('refresh-icon');
